@@ -8,3 +8,4 @@ class Color(StrEnum):
     GRAY = "#b7b8b4"
     BLUE = "#010388"
     PURPLE = "#690099"
+    RED = "#E93737"

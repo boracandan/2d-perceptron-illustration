@@ -3,7 +3,7 @@ name = "2d-perceptron-illustration"
 version = "0.1.0"
 description = "A pygame based illustration of Rosenblatt's perceptron in a 2D setting."
 authors = [
-    {name = "Your Name",email = "you@example.com"}
+    {name = "Bora Candan",email = "1boracandan@gmail.com"}
 ]
 license = {text = "MIT"}
 readme = "README.md"

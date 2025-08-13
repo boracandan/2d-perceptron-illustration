@@ -3,6 +3,7 @@ import pygame_gui
 
 from ui import UI
 from settings import *
+from algorithm import train_perceptron
 
 class Grid:
     def __init__(self, screenWidth: int, screenHeight: int, ui: UI) -> None:
@@ -25,7 +26,7 @@ class Grid:
         self.preMousePosition = pygame.Vector2(pygame.mouse.get_pos())
 
         self.points = []
-        self.funcCoef = []
+        self.weights = None
 
     def world_to_screen(self, *args):
         match args:
@@ -118,26 +119,20 @@ class Grid:
         pygame.draw.line(self.displaySurface, Color.BLACK, (0, self.origin.y), (self.width, self.origin.y))
 
     def draw_points(self) -> None:
-        pointWorldCoordinates = list(map(self.world_to_screen, self.points))
-        for pointCoordinate in pointWorldCoordinates:
-            if 0 < pointCoordinate.y < self.height and 0 < pointCoordinate.x < self.width:
-                pygame.draw.circle(self.displaySurface, Color.PURPLE, pointCoordinate, 2)
+        pointColPairs = list(map(lambda pointColPair: (self.world_to_screen(pointColPair[0]), pointColPair[2]), self.points))
+        for pointColPair in pointColPairs:
+            if 0 < pointColPair[0].y < self.height and 0 < pointColPair[0].x < self.width:
+                pygame.draw.circle(surface=self.displaySurface, color=pointColPair[1], center=pointColPair[0], radius=2)
 
-    def draw_func(self) -> None:
-        if self.funcCoef:
-            points = []
+    def draw_perceptron_boundary(self) -> None:
+        if self.weights is not None:  # weights = [w0, w1, w2]
+            worldX1 = self.screen_to_world(0, "x")
+            worldX2 = self.screen_to_world(self.width, "x")
 
-            for xPixel in range(0, self.width):
-                xVal = self.screen_to_world(xPixel, "x")
-                yVal = 0
-                for i in range(len(self.funcCoef)):
-                    yVal += self.funcCoef[i] * xVal ** i
-
-                screenPoint = pygame.Vector2(xPixel, self.world_to_screen(yVal, "y"))
-                points.append(screenPoint)
-
-            if len(points) >= 2:
-                pygame.draw.aalines(self.displaySurface, Color.BLUE, False, points)
+            worldY1 = -(self.weights[0] + self.weights[1] * worldX1) / self.weights[2]
+            worldY2 = -(self.weights[0] + self.weights[1] * worldX2) / self.weights[2]
+            
+            pygame.draw.aalines(self.displaySurface, Color.BLUE, False, [(0, self.world_to_screen(worldY1, "y")), (self.width, self.world_to_screen(worldY2, "y"))])
 
     def update_scale(self) -> None:
         if self.minScale <= self.scale <= self.maxScale:
@@ -149,7 +144,7 @@ class Grid:
         self.draw_axis()
         self.draw_mouse_pos()
         self.draw_points()
-        self.draw_func()
+        self.draw_perceptron_boundary()
     
     def handle_event(self, event: pygame.Event) -> None:
         if event.type == pygame.MOUSEWHEEL:
@@ -160,11 +155,12 @@ class Grid:
             newMousePosition = self.screen_to_world(mouseScreen)
             self.adjust_origin(preMousePosition, newMousePosition)
 
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            try:
-                pass
-            except ValueError:
-                pass # silently ignore invalid input
+        if (event.type == pygame_gui.UI_BUTTON_PRESSED \
+            and event.ui_element == self.ui.trainButton):
+            points = [(*coordinates, label) for coordinates, label, _ in self.points]
+            weights = train_perceptron(points)
+            self.weights = weights
+            
 
         
     def update(self) -> None:
@@ -188,11 +184,12 @@ class Grid:
         self.preMousePosition = mousePos
 
     def handle_mouse_just_pressed(self, mouseJustPressed: list) -> None:
-        if mouseJustPressed[2]: # Mouse Right Click
+        if mouseJustPressed[2] and (selectedBtn := self.ui.buttonGroup.activeButton): # Mouse right click when a group is selected
             mousePos = self.screen_to_world(pygame.Vector2(pygame.mouse.get_pos()))
-            self.points.append(mousePos)
+            self.points.append((mousePos, 1, Color.RED) if selectedBtn.text == "Group 1" else (mousePos, -1, Color.PURPLE))
 
     def handle_key_pressed(self, keyPressed: pygame.key.ScancodeWrapper):
         if keyPressed[pygame.K_r]:
             self.points = []
+            self.weights = None
 

@@ -4,7 +4,7 @@ import pygame
 from settings import *
 
 class UIButton(pygame_gui.elements.UIButton):
-    def __init__(self, relative_rect, text, manager = None, container = None, tool_tip_text = None, starting_height = 1, parent_element = None, object_id = None, anchors = None, allow_double_clicks = False, generate_click_events_from = (1,), visible = 1, *, command = None, tool_tip_object_id = None, text_kwargs = None, tool_tip_text_kwargs = None, max_dynamic_width = None, toggle_button = False, brighten_amount=40):
+    def __init__(self, relative_rect, text, manager = None, container = None, tool_tip_text = None, starting_height = 1, parent_element = None, object_id = None, anchors = None, allow_double_clicks = False, generate_click_events_from = (1,), visible = 1, *, command = None, tool_tip_object_id = None, text_kwargs = None, tool_tip_text_kwargs = None, max_dynamic_width = None, toggle_button = False, brighten_amount=40) -> None:
         super().__init__(relative_rect, text, manager, container, tool_tip_text, starting_height, parent_element, object_id, anchors, allow_double_clicks, generate_click_events_from, visible, command=command, tool_tip_object_id=tool_tip_object_id, text_kwargs=text_kwargs, tool_tip_text_kwargs=tool_tip_text_kwargs, max_dynamic_width=max_dynamic_width)
         self._toggleButton = toggle_button
         self._toggled = False
@@ -46,6 +46,12 @@ class ToggleButtonGroup:
             for btn in self.buttons:
                 if btn != pressed_button and btn.toggled:
                     btn.toggle()
+
+    @property
+    def activeButton(self) -> UIButton | None:
+        for btn in self.buttons:
+            if btn.toggled: return btn
+        return None
 
 
 class UI:
