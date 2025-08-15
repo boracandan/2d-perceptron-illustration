@@ -128,15 +128,6 @@ class Grid:
                 pygame.draw.circle(surface=self.displaySurface, color=pointColPair[1], center=pointColPair[0], radius=2)
 
     def draw_perceptron_boundary(self) -> None:
-        # if self.weights is not None:  # weights = [w0, w1, w2]
-        #     worldX1 = self.screen_to_world(0, "x")
-        #     worldX2 = self.screen_to_world(self.width, "x")
-
-        #     worldY1 = -(self.weights[0] + self.weights[1] * worldX1) / self.weights[2]
-        #     worldY2 = -(self.weights[0] + self.weights[1] * worldX2) / self.weights[2]
-            
-        #     pygame.draw.aalines(self.displaySurface, Color.BLUE, False, [(0, self.world_to_screen(worldY1, "y")), (self.width, self.world_to_screen(worldY2, "y"))])
-        
         for i, weights in enumerate(self.weightDeque):
             worldX1 = self.screen_to_world(0, "x")
             worldX2 = self.screen_to_world(self.width, "x")
