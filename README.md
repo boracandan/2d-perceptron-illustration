@@ -24,23 +24,30 @@ Inspired by my interest in machine learning and interactive visualizations, the 
 ---
 
 ## 🧰 Installation
-Recommended: use poetry.
 
+> Recommended: use poetry.
+
+```bash
 # Clone the repo
 git clone https://github.com/yourusername/perceptron-visualizer.git
 cd perceptron-visualizer
 
 # Create Virtual Environment and Install dependencies
 poetry install
+```
 
 ---
 
 ## ▶️ Running the App
+
+```bash
 # Using poetry
 poetry run python src/main.py
 
 # Or plain Python
 python src/main.py
+
+```
 
 ---
 
@@ -50,8 +57,11 @@ python src/main.py
 - pygame_gui
 - numpy
 
-If not using poetry, install with:
+If not using `poetry`, install with:
+
+```bash
 pip install pygame pygame_gui numpy
+```
 
 ---
 
@@ -81,3 +91,4 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 
 ## 📄 License
 MIT License. See LICENSE for details.
+
