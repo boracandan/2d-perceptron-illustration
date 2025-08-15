@@ -18,3 +18,18 @@ def train_perceptron(points: List[Tuple]) -> np.ndarray:
                 hyperplaneFound = False
 
     return w
+
+def train_perceptron_step(points: List[Tuple], w: np.ndarray | None) -> list[np.ndarray, bool]:
+    # +1 in length for the bias term w0
+    if w is None:
+        w = np.zeros(len(points[0]))  
+    
+    for point in points:
+        y = point[-1]                       # Class label (-1 or 1)
+        x = np.array([1, *point[:-1]])      # Add bias term at start
+
+        if y * (w @ x) <= 0:                # Misclassified
+            w = w + y * x
+            return w, False
+
+    return w, True

@@ -65,14 +65,21 @@ class UI:
         )
 
         self.trainButton = UIButton(
-            relative_rect=pygame.FRect((self.width * .125, self.height * .5), (self.width * .75, self.height * .3)),
+            relative_rect=pygame.FRect((self.width * .125, self.height * .35), (self.width * .75, self.height * .2)),
             text="Train Perceptron",
             manager=manager,
             container=self.uiPanel,
         )
 
+        self.animatedTrainButton = UIButton(
+            relative_rect=pygame.FRect((self.width * .125, self.height * .6), (self.width * .75, self.height * .2)),
+            text="Train Animated",
+            manager=manager,
+            container=self.uiPanel,
+        )
+
         self.groupOneButton = UIButton(
-            relative_rect=pygame.FRect((self.width * .08, self.height * .1), (self.width  * .38, self.height * .3)),
+            relative_rect=pygame.FRect((self.width * .08, self.height * .1), (self.width  * .38, self.height * .2)),
             text="Group 1",
             manager=manager,
             container=self.uiPanel,
@@ -80,7 +87,7 @@ class UI:
         )
 
         self.groupTwoButton = UIButton(
-            relative_rect=pygame.FRect((self.width * .51, self.height * .1), (self.width  * .38, self.height * .3)),
+            relative_rect=pygame.FRect((self.width * .51, self.height * .1), (self.width  * .38, self.height * .2)),
             text="Group 2",
             manager=manager,
             container=self.uiPanel,

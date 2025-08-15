@@ -1,9 +1,10 @@
 import pygame
 import pygame_gui
+from collections import deque
 
 from ui import UI
 from settings import *
-from algorithm import train_perceptron
+from algorithm import train_perceptron, train_perceptron_step
 
 class Grid:
     def __init__(self, screenWidth: int, screenHeight: int, ui: UI) -> None:
@@ -27,6 +28,8 @@ class Grid:
 
         self.points = []
         self.weights = None
+        self.weightDeque = deque(maxlen=5)
+        self.lastTrainTime = None
 
     def world_to_screen(self, *args):
         match args:
@@ -125,15 +128,25 @@ class Grid:
                 pygame.draw.circle(surface=self.displaySurface, color=pointColPair[1], center=pointColPair[0], radius=2)
 
     def draw_perceptron_boundary(self) -> None:
-        if self.weights is not None:  # weights = [w0, w1, w2]
+        # if self.weights is not None:  # weights = [w0, w1, w2]
+        #     worldX1 = self.screen_to_world(0, "x")
+        #     worldX2 = self.screen_to_world(self.width, "x")
+
+        #     worldY1 = -(self.weights[0] + self.weights[1] * worldX1) / self.weights[2]
+        #     worldY2 = -(self.weights[0] + self.weights[1] * worldX2) / self.weights[2]
+            
+        #     pygame.draw.aalines(self.displaySurface, Color.BLUE, False, [(0, self.world_to_screen(worldY1, "y")), (self.width, self.world_to_screen(worldY2, "y"))])
+        
+        for i, weights in enumerate(self.weightDeque):
             worldX1 = self.screen_to_world(0, "x")
             worldX2 = self.screen_to_world(self.width, "x")
 
-            worldY1 = -(self.weights[0] + self.weights[1] * worldX1) / self.weights[2]
-            worldY2 = -(self.weights[0] + self.weights[1] * worldX2) / self.weights[2]
+            worldY1 = -(weights[0] + weights[1] * worldX1) / weights[2]
+            worldY2 = -(weights[0] + weights[1] * worldX2) / weights[2]
             
-            pygame.draw.aalines(self.displaySurface, Color.BLUE, False, [(0, self.world_to_screen(worldY1, "y")), (self.width, self.world_to_screen(worldY2, "y"))])
+            pygame.draw.aalines(self.displaySurface, getattr(Color, f"BLUE_{i}"), False, [(0, self.world_to_screen(worldY1, "y")), (self.width, self.world_to_screen(worldY2, "y"))])
 
+        
     def update_scale(self) -> None:
         if self.minScale <= self.scale <= self.maxScale:
             return
@@ -155,12 +168,15 @@ class Grid:
             newMousePosition = self.screen_to_world(mouseScreen)
             self.adjust_origin(preMousePosition, newMousePosition)
 
-        if (event.type == pygame_gui.UI_BUTTON_PRESSED \
-            and event.ui_element == self.ui.trainButton):
-            points = [(*coordinates, label) for coordinates, label, _ in self.points]
-            weights = train_perceptron(points)
-            self.weights = weights
-            
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == self.ui.trainButton:
+                points = [(*coordinates, label) for coordinates, label, _ in self.points]
+                self.weightDeque.clear()
+                self.weightDeque.append(train_perceptron(points))
+            elif event.ui_element == self.ui.animatedTrainButton:
+                self.lastTrainTime = 0
+                self.train_perceptron_flag = True
+                self.weightDeque.clear()
 
         
     def update(self) -> None:
@@ -171,6 +187,20 @@ class Grid:
             self.handle_mouse_drag(mousePressed)
             self.handle_mouse_just_pressed(mouseJustPressed)
         self.handle_key_pressed(keyPressed)
+
+
+         # Continuous perceptron training if a flag is set
+        if hasattr(self, "train_perceptron_flag") and self.train_perceptron_flag:
+            now = pygame.time.get_ticks()
+            if now - self.lastTrainTime >= TRAIN_INTERVAL_MS:
+                self.lastTrainTime = now
+                points = [(*coordinates, label) for coordinates, label, _ in self.points]
+                self.weights, hyperplaneFound = train_perceptron_step(points, self.weights)
+                self.weightDeque.append(self.weights)
+
+                if hyperplaneFound:
+                    self.train_perceptron_flag = False
+                    self.weightDeque = deque([self.weightDeque[-1]], maxlen=5)
 
     def adjust_origin(self, preMousePos: pygame.Vector2, newMousePos: pygame.Vector2) -> None:
         offset = newMousePos - preMousePos
@@ -192,4 +222,5 @@ class Grid:
         if keyPressed[pygame.K_r]:
             self.points = []
             self.weights = None
+            self.weightDeque.clear()
 

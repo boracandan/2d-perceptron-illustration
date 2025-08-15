@@ -13,12 +13,9 @@ class PerceptronIllustration:
         self.clock = pygame.time.Clock()
         self.running = True
 
-        # groups 
-        self.all_sprites = pygame.sprite.Group()
-
         # UI
         self.uiManager = pygame_gui.UIManager((WINDOW_WIDTH, WINDOW_HEIGHT))
-        self.ui = UI(pygame.Rect((WINDOW_WIDTH - 158, -2), (160, 120)), self.uiManager)
+        self.ui = UI(pygame.Rect((WINDOW_WIDTH - 158, -2), (160, 150)), self.uiManager)
 
         # Grid
         self.grid = Grid(WINDOW_WIDTH, WINDOW_HEIGHT, ui=self.ui)
@@ -41,7 +38,6 @@ class PerceptronIllustration:
 
             # Update
             self.uiManager.update(dt)
-            self.all_sprites.update()
             self.grid.update()
             
             # Draw
